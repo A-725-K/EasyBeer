@@ -1,10 +1,14 @@
 \documentclass{article}
-\usepackage[utf8]{inputenc}
+
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 \usepackage{bera}% optional: just to have a nice mono-spaced font
 \usepackage{listings}
 \usepackage{xcolor}
+
+\usepackage{uml}
+
+
 
 \colorlet{punct}{red!60!black}
 \definecolor{background}{HTML}{EEEEEE}
@@ -59,7 +63,7 @@ data analysis.
 \newpage
 
 \section{Conceptual schema}
-This is an empty example of a conceptual schema, in real documentation i hope the result will be better\\
+This is an empty example of a conceptual schema, in real documentation i hope the result will be better
 
 \begin{tikzpicture}[squarednode/.style={rectangle, draw=red!60, fill=red!5, very thick, minimum size=30mm},]
 
@@ -99,6 +103,8 @@ This is a json- style example
 \newpage
 
 
-
+\umlClass[box=,reference=AmericanMan,stereotype=Uomo,import=,importedFrom=America,comment=A man from America]{American Man}{%
+\umlAttribute[visibility=\#, type=State]{State}\umlAttribute[visibility=\#,default=Mc Donalds]{Favourite burger}}{%
+\umlMethod[visibility=]{Watch TV}{}\umlMethod[visibility=-, returntype=int]{Vote}{Party party}}
 
 \end{document}
