@@ -12,8 +12,8 @@ REGEX='^[a-zA-Z][a-zA-Z 0-9_-]*$'
 # select only a suset of features among all
 function select_features() {
     if [ $# -ne 1 ]; then
-	echo "select_features: This function require only 1 parameter !"
-	exit
+	echo "select_features: This function requires only 1 parameter !"
+	exit -1
     fi
 
     echo $1 | cut -d "," -f 1,2,4,6,7,8,9,10,11,12,13,14,15,17,18,20
@@ -22,8 +22,8 @@ function select_features() {
 # delete those beers with strange name or style with strange characters or symbols
 function preprocess_names_and_styles() {
     if [ $# -ne 1 ]; then
-	echo "preprocess_names: This function require only 1 parameter !"
-	exit
+	echo "preprocess_names: This function requires only 1 parameter !"
+	exit -1
     fi
     
     first=0
@@ -55,7 +55,7 @@ function preprocess_names_and_styles() {
 function specgrav_2_plato() {
     if [ $# -ne 1 ]; then
 	echo "specgrav_2_plato: This function require only 1 parameter !"
-	exit
+	exit -1
     fi
 
     sg=$1
@@ -70,7 +70,7 @@ function specgrav_2_plato() {
 function preprocess_degree() {
     if [ $# -ne 1 ]; then
 	echo "preprocess_degree: This function require only 1 parameter !"
-	exit
+	exit -1
     fi
 
     first=0
@@ -128,11 +128,11 @@ function preprocess_degree() {
 # checks on input
 if [ $# -ne 1 ]; then
     echo "Usage: ./preprocessing.sh <dataset_name>"
-    exit
+    exit -1
 fi
 if [ ! -f $1 ]; then
     echo "Error: file '$1' does not exists"
-    exit
+    exit -1
 fi
 
 # cleaning files from previous executions
