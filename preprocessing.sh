@@ -5,7 +5,7 @@ set -o errexit
 set -o nounset
 
 # constants
-DATASET_NAME='dataset.csv'
+DATASET_NAME='beers.csv'
 TEMP_FILE='temp.csv'
 REGEX='^[a-zA-Z][a-zA-Z 0-9_-]*$'
 
