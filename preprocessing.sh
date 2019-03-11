@@ -19,8 +19,8 @@ function select_features() {
     echo $1 | cut -d "," -f 1,2,4,6,7,8,9,10,11,12,13,14,15,17,18,20
 }
 
-# delete those beers with strange name with strange characters or symbols
-function preprocess_names() {
+# delete those beers with strange name or style with strange characters or symbols
+function preprocess_names_and_styles() {
     if [ $# -ne 1 ]; then
 	echo "preprocess_names: This function require only 1 parameter !"
 	exit
@@ -38,8 +38,9 @@ function preprocess_names() {
 	fi
     
 	beerName=$(echo $line | cut -d "," -f 2)
+	beerStyle=$(echo $line | cut -d "," -f 3)
     
-	if [[ $beerName =~ $REGEX ]] && [[ ${#beerName} -ge 3 ]]; then
+	if [[ $beerName =~ $REGEX ]] && [[ ${#beerName} -ge 3 ]] && [[ $beerStyle =~ $REGEX ]] && [[ ${#beerStyle} -ge 3 ]]; then
 	    echo $line >> "1$TEMP_FILE"
 	fi
 
@@ -139,12 +140,12 @@ rm -rf *$TEMP_FILE
 rm -rf $DATASET_NAME
 
 # pre-processing dataset
-echo -n "Processing names of beers"
-preprocess_names $1
-echo ""
-echo -n "Processing sugar scale"
+echo -n 'Processing names and styles of beers'
+preprocess_names_and_styles $1
+echo ''
+echo -n 'Processing sugar scale'
 preprocess_degree "1$TEMP_FILE"
-echo ""
+echo ''
 
 # changing name to clean dataset
 mv "2$TEMP_FILE" $DATASET_NAME
