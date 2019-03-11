@@ -5,7 +5,7 @@
 %\usepackage{bera}% optional: just to have a nice mono-spaced font
 \usepackage{listings}
 \usepackage{xcolor}
-
+\usepackage{pst}
 \usepackage{uml}
 
 
@@ -105,9 +105,17 @@ This is a json- style example
 \umlDiagram[box=,sizeX=7cm, sizeY=7cm, ref=relation]{
 \umlClass[pos=\umlBottomLeft{relation}, posDelta={1,1}, refpoint=bl,reference=A]{Class A}{}{}
 \umlClass[pos=\umlTopRight{relation}, posDelta={-1,-1}, refpoint=tr,reference=B]{Class B}{}{}
-\umlClass[pos=\umlBottomLeft{relation}, posDelta={12,12}, refpoint=bl,reference=A]{Class A}{}{}
-\umlClass[pos=\umlTopRight{relation}, posDelta={-12,-12}, refpoint=tr,reference=B]{Class B}{}{}
 
+\umlRelation{A}{B}{
+	\umlLabelA{AB}{*}
+	\umlLabelB{AB}{1}
+}
+\umlLabel[fraction=.5,offset=0]{AB}{center}
+\umlAssociationEnd[fraction=A, angle=U]{AB}{A}
+\umlAssociationEnd[fraction=B, angle=R]{AB}{B}
+\umlSubclass[ref=ABsub, angleA=0, armA=5, armAngleA=0,angleB=300, linecolor=blue,nodesep=1ex]{A}{B}
+\umlComposition[reference=ABComp,angleA=120, arm=4, armAngleA=80,angleB=180, armAngleB=190]{A}{B}
+\umlNavigabilityA{ABComp}
 }
 
 
