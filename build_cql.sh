@@ -106,26 +106,22 @@ function insert_nl() {
 
 # compose the create table statement
 function create_table() {
-    # if [ $# -ne 4 ]; then
-    # 	echo 'create_table: This function requires 4 parameters !'
-    # 	exit -1
-    # fi
+    if [ $# -ne 4 ]; then
+    	echo 'create_table: This function requires 4 parameters !'
+    	exit -1
+    fi
 
     idxs=$2
     str="CREATE TABLE $1 (\n\t"
     echo "DROP TABLE IF EXISTS $1;" >> $OUT
 
-    for i in ${idxs[@]}; do
-	echo "i = $i"	
+    for i in $2; do
 	col=${indexes[$i]}
-	echo "col = $col"
 	type="${types[$col]}"
-	echo "type = $type"
 	str="$str$col $type,\n\t"
     done
     str="${str}PRIMARY KEY()\n);"
     echo -e $str
-    echo -e $str >> $OUT
 }
 
 ############
@@ -144,27 +140,27 @@ echo -n "Insert index of columns separated with ' ':   "
 read -e idxs
 nCols=$(echo $idxs | awk -F' ' '{print NF}')
 
-# keyN=0
-# partN=1
-# while [[ $partN -gt $keyN ]]; do
-#     echo -n 'How many columns are primary key ?   '
-#     read keyN
+keyN=0
+partN=1
+while [[ $partN -gt $keyN ]]; do
+    echo -n 'How many columns are primary key ?   '
+    read keyN
 	  
-#     echo -n 'How many columns are partition key?   '
-#     read partN
+    echo -n 'How many columns are partition key?   '
+    read partN
 
-#     if [[ $partN -gt $keyN ]]; then
-# 	echo 'ERROR: There must be less columns in the partition key than columns in the primary key !'
-#     elif [[ $keyN -gt $nCols ]]; then
-# 	echo 'ERROR: There must be less columns in the primary key than columns in the whole table !'
-# 	keyN=0
-# 	partN=1
-#     elif [[ $partN -gt $nCols ]]; then
-# 	echo 'ERROR: There must be less columns in the partition key than columns in the whole table !'
-# 	keyN=0
-# 	partN=1
-#     fi
-# done
+    if [[ $partN -gt $keyN ]]; then
+	echo 'ERROR: There must be less columns in the partition key than columns in the primary key !'
+    elif [[ $keyN -gt $nCols ]]; then
+	echo 'ERROR: There must be less columns in the primary key than columns in the whole table !'
+	keyN=0
+	partN=1
+    elif [[ $partN -gt $nCols ]]; then
+	echo 'ERROR: There must be less columns in the partition key than columns in the whole table !'
+	keyN=0
+	partN=1
+    fi
+done
 
-create_table $tableName "$idxs" #$idxs_a $keyN $partN
+create_table $tableName "$idxs" #$keyN $partN
 
