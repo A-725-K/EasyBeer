@@ -2,7 +2,7 @@
 
 \usepackage{tikz}
 \usetikzlibrary{positioning}
-\usepackage{bera}% optional: just to have a nice mono-spaced font
+%\usepackage{bera}% optional: just to have a nice mono-spaced font
 \usepackage{listings}
 \usepackage{xcolor}
 
@@ -48,7 +48,7 @@
 \begin{document}
 
 \maketitle
-\tableofcontents
+%\tableofcontents
 \newpage
 
 
@@ -102,9 +102,13 @@ This is a json- style example
 
 \newpage
 
+\umlDiagram[box=,sizeX=7cm, sizeY=7cm, ref=relation]{
+\umlClass[pos=\umlBottomLeft{relation}, posDelta={1,1}, refpoint=bl,reference=A]{Class A}{}{}
+\umlClass[pos=\umlTopRight{relation}, posDelta={-1,-1}, refpoint=tr,reference=B]{Class B}{}{}
+\umlClass[pos=\umlBottomLeft{relation}, posDelta={12,12}, refpoint=bl,reference=A]{Class A}{}{}
+\umlClass[pos=\umlTopRight{relation}, posDelta={-12,-12}, refpoint=tr,reference=B]{Class B}{}{}
 
-\umlClass[box=,reference=AmericanMan,stereotype=Uomo,import=,importedFrom=America,comment=A man from America]{American Man}{%
-\umlAttribute[visibility=\#, type=State]{State}\umlAttribute[visibility=\#,default=Mc Donalds]{Favourite burger}}{%
-\umlMethod[visibility=]{Watch TV}{}\umlMethod[visibility=-, returntype=int]{Vote}{Party party}}
+}
+
 
 \end{document}
