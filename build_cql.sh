@@ -100,10 +100,6 @@ function show_cols() {
     echo '----------------------------------'
 }
 
-function insert_nl() {
-    echo -e "$1\n"
-}
-
 # compose the create table statement
 function create_table() {
     if [ $# -ne 4 ]; then
@@ -111,17 +107,47 @@ function create_table() {
     	exit -1
     fi
 
+    tableName=$1
     idxs=$2
-    str="CREATE TABLE $1 (\n\t"
+    keyN=$3
+    partN=$4
+    str="CREATE TABLE $tableName (\n\t"
     echo "DROP TABLE IF EXISTS $1;" >> $OUT
 
-    for i in $2; do
+    for i in ${idxs[@]}; do
 	col=${indexes[$i]}
 	type="${types[$col]}"
 	str="$str$col $type,\n\t"
     done
-    str="${str}PRIMARY KEY()\n);"
+    str="${str}PRIMARY KEY("
+
+    idx=0
+    if [[ $partN -gt 0 ]] && [[ $partN -ne $keyN ]]; then
+	str="$str("
+    fi
+    for i in ${idxs[@]}; do
+	col=${indexes[$i]}
+	if [[ $idx -eq $(( keyN-1 )) ]] || [[ $idx -eq $(( partN-1 )) ]]; then
+	    str="$str$col"
+	else
+	    str="$str$col, "
+	fi
+	(( ++idx ))
+	if [[ $idx -eq $partN ]]; then
+	    if [[ $partN -eq $keyN ]]; then
+		str="$str"
+	    else
+		str="$str), "
+	    fi
+	fi
+	if [[ $idx -eq $keyN ]]; then
+	    break
+	fi
+    done
+    str="$str)\n);"
+    
     echo -e $str
+    echo -e $str >> $OUT
 }
 
 ############
@@ -159,8 +185,11 @@ while [[ $partN -gt $keyN ]]; do
 	echo 'ERROR: There must be less columns in the partition key than columns in the whole table !'
 	keyN=0
 	partN=1
+    elif [[ $keyN -eq 0 ]]; then
+	echo 'ERROR: At least one column must appear in the primary key !'
+	keyN=0
+	partN=1
     fi
 done
 
-create_table $tableName "$idxs" #$keyN $partN
-
+create_table $tableName "$idxs" $keyN $partN
