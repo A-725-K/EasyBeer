@@ -6,7 +6,7 @@ set -o nounset
 
 # datasets
 PUBS='pubs.csv'
-BEERS='dataset.csv'
+BEERS='beers.csv'
 SUPPL='suppliers.csv'
 
 # output file
@@ -150,6 +150,60 @@ function create_table() {
     echo -e $str >> $OUT
 }
 
+function insert(){
+
+	
+	if [ $# -gt 1 ]; then
+		echo 'create_table: This function requires 0 parameters !'
+		exit -1
+	fi
+	
+	idxs=$1
+
+	for z in {2..50}; do
+	
+	
+	
+	final="INSERT INTO $tableName("
+	for i in ${idxs[@]}; do
+	
+	if [ $i -lt 6 ]; then 
+		idx=$((i - 1 ))
+		table="pubs"
+				
+	fi
+	
+	if [ $i -gt 5 ] && [ $i -lt 11 ]; then 
+		idx=$((i - 6 ))
+		table="suppliers"
+
+	fi
+
+
+	if [ $i -gt 10 ]; then 
+		idx=$((i - 11 ))
+		table="beers"
+
+	fi
+
+	IFS=',' read -r -a array <<< str=$(sed "${z}q;d" "${table}.csv")
+	
+	
+	final="${final}${array[$idx]},"
+
+	done
+	final=${final%?};
+	final="$final);\n"
+	echo -e $final
+    echo -e "$final" >> $OUT
+
+	done
+	
+	# for i in ${table[@]}; do echo $i; done
+	
+
+}
+
 ############
 ### MAIN ###
 ############
@@ -193,3 +247,4 @@ while [[ $partN -gt $keyN ]]; do
 done
 
 create_table $tableName "$idxs" $keyN $partN
+insert "$idxs"
