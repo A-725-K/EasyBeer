@@ -1,4 +1,4 @@
-#!/bin/bash
+qqq#!/bin/bash
 
 # for debug
 set -o errexit
@@ -150,58 +150,36 @@ function create_table() {
     echo -e $str >> $OUT
 }
 
-function insert(){
-
-	
-	if [ $# -gt 1 ]; then
-		echo 'create_table: This function requires 0 parameters !'
-		exit -1
-	fi
-	
-	idxs=$1
-
-	for z in {2..50}; do
-	
-	
-	
+# compose the insert statements
+function create_insert() {
+    if [ $# -gt 1 ]; then
+	echo 'create_insert: This function requires 1 parameters !'
+	exit -1
+    fi
+    
+    idxs=$1
+    for z in {2..50}; do
 	final="INSERT INTO $tableName("
 	for i in ${idxs[@]}; do
-	
-	if [ $i -lt 6 ]; then 
-		idx=$((i - 1 ))
-		table="pubs"
-				
-	fi
-	
-	if [ $i -gt 5 ] && [ $i -lt 11 ]; then 
-		idx=$((i - 6 ))
-		table="suppliers"
-
-	fi
-
-
-	if [ $i -gt 10 ]; then 
-		idx=$((i - 11 ))
-		table="beers"
-
-	fi
-
-	IFS=',' read -r -a array <<< str=$(sed "${z}q;d" "${table}.csv")
-	
-	
-	final="${final}${array[$idx]},"
-
+	    if [ $i -le 5 ]; then 
+		idx=$i
+		table_name=$PUBS
+	    elif [ $i -gt 5 ] && [ $i -le 10 ]; then 
+		idx=$(( i - 5 ))
+		table_name=$SUPPL
+	    elif [ $i -gt 10 ]; then 
+		idx=$(( i - 10 ))
+		table_name=$BEERS
+	    fi
+	    
+	    final="$final$(sed "${z}q;d" $table_name | cut -d ',' -f $idx),"
 	done
-	final=${final%?};
-	final="$final);\n"
-	echo -e $final
-    echo -e "$final" >> $OUT
-
-	done
-	
-	# for i in ${table[@]}; do echo $i; done
-	
-
+	final="${final%?});";
+	echo $final
+	echo $final >> $OUT
+    done
+    
+    # for i in ${table[@]}; do echo $i; done
 }
 
 ############
@@ -247,4 +225,4 @@ while [[ $partN -gt $keyN ]]; do
 done
 
 create_table $tableName "$idxs" $keyN $partN
-insert "$idxs"
+create_insert "$idxs"
