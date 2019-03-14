@@ -1,4 +1,4 @@
-qqq#!/bin/bash
+#!/bin/bash
 
 # for debug
 set -o errexit
@@ -122,7 +122,7 @@ function create_table() {
     str="${str}PRIMARY KEY("
 
     idx=0
-    if [[ $partN -gt 0 ]] && [[ $partN -ne $keyN ]]; then
+    if [[ $partN -gt 1 ]]; then #&& [[ $partN -ne $keyN ]]; then
 	str="$str("
     fi
     for i in ${idxs[@]}; do
@@ -134,10 +134,14 @@ function create_table() {
 	fi
 	(( ++idx ))
 	if [[ $idx -eq $partN ]]; then
-	    if [[ $partN -eq $keyN ]]; then
-		str="$str"
+	    if [[ $partN -gt 1 ]]; then
+		if [[ $idx -eq $keyN ]]; then
+	 	    str="$str)"
+		else
+		    str="$str), "
+		fi
 	    else
-		str="$str), "
+	 	str="$str, "
 	    fi
 	fi
 	if [[ $idx -eq $keyN ]]; then
@@ -161,6 +165,10 @@ function create_insert() {
     for z in {2..50}; do
 	final="INSERT INTO $tableName("
 	for i in ${idxs[@]}; do
+	    final="$final${indexes[$i]},"
+	done
+	final="${final%?}) VALUES (";
+	for i in ${idxs[@]}; do
 	    if [ $i -le 5 ]; then 
 		idx=$i
 		table_name=$PUBS
@@ -171,15 +179,19 @@ function create_insert() {
 		idx=$(( i - 10 ))
 		table_name=$BEERS
 	    fi
-	    
-	    final="$final$(sed "${z}q;d" $table_name | cut -d ',' -f $idx),"
+	    tmp=$(sed "${z}q;d" $table_name | cut -d ',' -f $idx)
+	    col=${indexes[$i]}
+	    type="${types[$col]}"
+	    if [ $type == $TEXT ]; then
+		final="$final'$tmp',"
+	    else
+		final="$final$tmp,"
+	    fi
 	done
-	final="${final%?});";
+	final="${final%?});"
 	echo $final
 	echo $final >> $OUT
     done
-    
-    # for i in ${table[@]}; do echo $i; done
 }
 
 ############
@@ -226,3 +238,6 @@ done
 
 create_table $tableName "$idxs" $keyN $partN
 create_insert "$idxs"
+
+# this command prints the first n rows of a file randomly ordered
+# cat <file.csv> | awk '{if (NR > 1) print}' | sort -R | head -n (n=num rows)
