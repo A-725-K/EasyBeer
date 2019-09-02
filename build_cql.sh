@@ -24,8 +24,8 @@ declare -A types
 # initialize types' hashmap
 function initialize_types() {
     if [ $# -ne 0 ]; then
-		echo 'initialize_types: This function requires no parameter !'
-		exit -1
+	echo 'initialize_types: This function requires no parameter !'
+	exit -1
     fi
     
     # pubs
@@ -46,7 +46,7 @@ function initialize_types() {
     types["BeerID"]=$INT
     types["Name"]=$TEXT
     types["Style"]=$TEXT
-    types["Size(L)"]=$FLOAT
+    types["Size"]=$FLOAT
     types["OG"]=$FLOAT
     types["FG"]=$FLOAT
     types["ABV"]=$FLOAT
@@ -63,12 +63,12 @@ function initialize_types() {
 # show the columns of the datasets indexed
 function show_cols() {
     if [ $# -ne 0 ]; then
-		echo 'show_cols: This function requires no parameter !'
-		exit -1
+	echo 'show_cols: This function requires no parameter !'
+	exit -1
     fi
-
+    
     idx=1
-
+    
     echo 'Features of datasets:'
     echo '----------------------------------'
     
@@ -92,11 +92,11 @@ function show_cols() {
     
     headB=$(head -1 $BEERS)
     for field in ${headB//,/ }; do
-		echo "$idx)  $field"
-		indexes["$idx"]=$field
-		(( ++idx ))
+	echo "$idx)  $field"
+	indexes["$idx"]=$field
+	(( ++idx ))
     done
-
+    
     echo '----------------------------------'
 }
 
@@ -111,42 +111,45 @@ function create_table() {
     idxs=$2
     keyN=$3
     partN=$4
-    str="CREATE TABLE $tableName (\n\t"
     echo "DROP TABLE IF EXISTS $1;" >> $OUT
-
+    str="CREATE TABLE $tableName (\n\t"
+    
     for i in ${idxs[@]}; do
-		col=${indexes[$i]}
-		type="${types[$col]}"
-		str="$str$col $type,\n\t"
+	col=${indexes[$i]}
+	type="${types[$col]}"
+	str="$str$col $type,\n\t"
     done
     str="${str}PRIMARY KEY("
-
     idx=0
     if [[ $partN -gt 1 ]]; then #&& [[ $partN -ne $keyN ]]; then
-		str="$str("
+	str="$str("
     fi
+    
     for i in ${idxs[@]}; do
-		col=${indexes[$i]}
-		if [[ $idx -eq $(( keyN-1 )) ]] || [[ $idx -eq $(( partN-1 )) ]]; then
-	    	str="$str$col"
-		else
-		    str="$str$col, "
-		fi
-		(( ++idx ))
-		if [[ $idx -eq $partN ]]; then
-		    if [[ $partN -gt 1 ]]; then
-				if [[ $idx -eq $keyN ]]; then
-	 	    		str="$str)"
-				else
-				    str="$str), "
-				fi
-		    else
-			 	str="$str, "
-		    fi
-		fi
+	col=${indexes[$i]}
+	if [[ $idx -eq $(( keyN-1 )) ]] || [[ $idx -eq $(( partN-1 )) ]]; then
+	    str="$str$col"
+	else
+	    str="$str$col, "
+	fi
+	(( ++idx ))
+	if [[ $idx -eq $keyN ]]; then
+	    if [[ $partN -eq $keyN ]] && [[ $keyN -gt 1 ]]; then
+		str="$str)"
+	    fi
+	    break
+	fi
+	if [[ $idx -eq $partN ]]; then
+	    if [[ $partN -gt 1 ]]; then
 		if [[ $idx -eq $keyN ]]; then
-	    	break
+	 	    str="$str)"
+		else
+		    str="$str), "
 		fi
+	    else
+		str="$str, "
+	    fi
+	fi
     done
     str="$str)\n);"
     
@@ -157,44 +160,44 @@ function create_table() {
 # compose the insert statements
 function create_insert() {
     if [ $# -gt 1 ]; then
-		echo 'create_insert: This function requires 1 parameters !'
-		exit -1
+	echo 'create_insert: This function requires 1 parameters !'
+	exit -1
     fi
     
     idxs=$1
-	howMany=$(cat $BEERS | wc -l)	
-	for (( z=2; z<=$howMany; z++)); do
-		if (( z%100 == 0)); then
-			echo -n '.'
-		fi
-		final="INSERT INTO $tableName("
-		for i in ${idxs[@]}; do
-	    	final="$final${indexes[$i]},"
-		done
-		final="${final%?}) VALUES (";
-		for i in ${idxs[@]}; do
-		    ### if [ $i -le 5 ]; then 
-			###	idx=$i
-			###	table_name=$PUBS
-		    ### elif [ $i -gt 5 ] && [ $i -le 10 ]; then 
-			###	idx=$(( i - 5 ))
-			###	table_name=$SUPPL
-	    	### elif [ $i -gt 10 ]; then 
-			### idx=$(( i - 10 ))
-			table_name=$BEERS
-		    ### fi
-		    tmp=$(sed "${z}q;d" $table_name | cut -d ',' -f $i)
-	    	col=${indexes[$i]}
-		    type="${types[$col]}"
-		    if [ $type == $TEXT ]; then
-				final="$final'$tmp',"
-	    	else
-				final="$final$tmp,"
-	    	fi
-		done
-		final="${final%?});"
-		#echo $final
-		echo $final >> $OUT
+    howMany=$(cat $BEERS | wc -l)	
+    for (( z=2; z<=$howMany; z++)); do
+	if (( z%1000 == 0)); then
+	    echo -n '.'
+	fi
+	final="INSERT INTO $tableName("
+	for i in ${idxs[@]}; do
+	    final="$final${indexes[$i]},"
+	done
+	final="${final%?}) VALUES (";
+	for i in ${idxs[@]}; do
+	    ### if [ $i -le 5 ]; then 
+	    ###	idx=$i
+	    ###	table_name=$PUBS
+	    ### elif [ $i -gt 5 ] && [ $i -le 10 ]; then 
+	    ###	idx=$(( i - 5 ))
+	    ###	table_name=$SUPPL
+	    ### elif [ $i -gt 10 ]; then 
+	    ### idx=$(( i - 10 ))
+	    table_name=$BEERS
+	    ### fi
+	    tmp=$(sed "${z}q;d" $table_name | cut -d ',' -f $i)
+	    col=${indexes[$i]}
+	    type="${types[$col]}"
+	    if [ $type == $TEXT ]; then
+		final="$final'$tmp',"
+	    else
+		final="$final$tmp,"
+	    fi
+	done
+	final="${final%?});"
+	#echo $final
+	echo $final >> $OUT
     done
 }
 
@@ -224,19 +227,19 @@ while [[ $partN -gt $keyN ]]; do
     read partN
 
     if [[ $partN -gt $keyN ]]; then
-		echo 'ERROR: There must be less columns in the partition key than columns in the primary key !'
+	echo 'ERROR: There must be less columns in the partition key than columns in the primary key !'
     elif [[ $keyN -gt $nCols ]]; then
-		echo 'ERROR: There must be less columns in the primary key than columns in the whole table !'
-		keyN=0
-		partN=1
+	echo 'ERROR: There must be less columns in the primary key than columns in the whole table !'
+	keyN=0
+	partN=1
     elif [[ $partN -gt $nCols ]]; then
-		echo 'ERROR: There must be less columns in the partition key than columns in the whole table !'
-		keyN=0
-		partN=1
+	echo 'ERROR: There must be less columns in the partition key than columns in the whole table !'
+	keyN=0
+	partN=1
     elif [[ $keyN -eq 0 ]]; then
-		echo 'ERROR: At least one column must appear in the primary key !'
-		keyN=0
-		partN=1
+	echo 'ERROR: At least one column must appear in the primary key !'
+	keyN=0
+	partN=1
     fi
 done
 
