@@ -43,7 +43,7 @@ function initialize_types() {
     #types["email"]=$TEXT
 
     # beers
-    types["BeerID"]=$INT
+    types["ClusteringId"]=$INT
     types["Name"]=$TEXT
     types["Style"]=$TEXT
     types["Size"]=$FLOAT
@@ -111,6 +111,7 @@ function create_table() {
     idxs=$2
     keyN=$3
     partN=$4
+	echo "USE ks_user10;" >> $OUT
     echo "DROP TABLE IF EXISTS $1;" >> $OUT
     str="CREATE TABLE $tableName (\n\t"
     

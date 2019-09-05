@@ -16,7 +16,7 @@ function select_features() {
 	exit -1
     fi
 
-    echo $1 | cut -d "," -f 1,2,4,6,7,8,9,10,11,12,13,14,15,17,18,20
+    echo $1 | cut -d "," -f 2,4,6,7,8,9,10,11,12,13,14,15,17,18,20
 }
 
 # delete those beers with strange name or style with strange characters or symbols
@@ -121,6 +121,30 @@ function preprocess_degree() {
     done < $1
 }
 
+function preprocess_beerid() {
+    if [ $# -ne 1 ]; then
+	echo "preprocess_beer: This function requires only 1 parameter !"
+	exit -1
+    fi
+
+    first=0
+    while read -r line; do
+    	if [ $first -eq 0 ]; then
+	    echo "ClusteringId,$line" > "3$TEMP_FILE"
+	    (( ++first ))
+    	    continue
+    	fi
+
+	clustering=$(echo "($first-1)%3 + 1" | bc)
+	echo "$clustering,$line" >> "3$TEMP_FILE"
+
+	(( ++first ))
+	if [ $(( first % 500)) -eq 0 ]; then
+	    echo -n '.'
+	fi
+    done < $1
+}
+
 ##################
 ###### MAIN ######
 ##################
@@ -146,9 +170,13 @@ echo ''
 echo -n 'Processing sugar scale'
 preprocess_degree "1$TEMP_FILE"
 echo ''
+echo -n 'Processing beer id'
+preprocess_beerid "2$TEMP_FILE"
+echo ''
 
 # changing name to clean dataset
-mv "2$TEMP_FILE" $DATASET_NAME
+#mv "3$TEMP_FILE" $DATASET_NAME
+grep -v "N/A" "3$TEMP_FILE" > "$DATASET_NAME"
 
 # removing all temporary files
 rm -rf *$TEMP_FILE
