@@ -15,8 +15,8 @@ public final class Query4 {
 	public static final String DATASET = "hdfs://master:9000/user/user10/input/beers.csv";
 	public static final String BREW_METHOD = "BIAB";
 
-	//Among all beers that share a brew method (e.g. BIAB), compute the average of apparent
-	//attenuation (in percentage) and the average real attenuation (in percentage)
+	//AMONG ALL BEERS THAT SHARE A BREW METHOD (E.G. BIAB), COMPUTE THE AVERAGE OF APPARENT
+	//ATTENUATION (IN PERCENTAGE) AND THE AVERAGE REAL ATTENUATION (IN PERCENTAGE)
 	//see www.brewtheplanet.it/grado_alcolico.html
 	public static void main(String[] args) throws Exception {
 		SparkSession ss = SparkSession

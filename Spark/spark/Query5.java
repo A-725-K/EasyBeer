@@ -18,8 +18,8 @@ public final class Query5 {
 	private static Tuple2<String, Long> max_brew = new Tuple2<>("", 0l);
 
      //map:
-     //  K  ==>  color
-     //  V  ==>  how many beers with that color
+     //  K  ==>  brew method
+     //  V  ==>  how many beers share that brew method
      private static void setMax(Map<String, Long> map) {
         map.forEach((k, v) -> {
              if (v >=  max_brew._2())
@@ -27,7 +27,7 @@ public final class Query5 {
          });
      }
 
-	//FOR EACH STYLE SELECT THE GREATEST ABV
+	//RETRIEVE THE MOST POPULAR BREW METHOD AMONG DOUBLE MALT BEERS AND HOW MANY BEERS SHARE IT
 	public static void main(String[] args) throws Exception {
 		SparkSession ss = SparkSession
 				.builder()
@@ -35,18 +35,18 @@ public final class Query5 {
 				.getOrCreate();
 
 		JavaRDD<String> lines = ss.read().textFile(DATASET).javaRDD();
-		JavaRDD<String> double_malt = lines.filter(b -> !COMMA.split(b)[11].equals("N/A") && Double.valueOf(COMMA.split(b)[11]) > 14.5  &&  Double.valueOf(COMMA.split(b)[6]) > 3.5);
+		JavaRDD<String> double_malt = lines.filter(b -> !COMMA.split(b)[11].equals("N/A") && Double.valueOf(COMMA.split(b)[11]) > 14.5 && Double.valueOf(COMMA.split(b)[6]) > 3.5);
 	
-		JavaPairRDD<String,String> double_malt_and_names = double_malt.mapToPair(b -> new Tuple2<>(COMMA.split(b)[13],COMMA.split(b)[1]));
+		JavaPairRDD<String,String> double_malt_and_names = double_malt.mapToPair(b -> new Tuple2<>(COMMA.split(b)[13], COMMA.split(b)[1]));
 		Map<String,Long> count_group_by = double_malt_and_names.countByKey();
 	
 		setMax(count_group_by);
 		
-        String maxBrew = max_brew._1();
-        JavaPairRDD<String, String> result =  double_malt_and_names.filter(b -> b._1().equals(maxBrew) );
-        List<Tuple2<String, String>> list_print  = result.collect();
+        /*String maxBrew = max_brew._1();
+        JavaPairRDD<String, String> result = double_malt_and_names.filter(b -> b._1().equals(maxBrew));
+        List<Tuple2<String, String>> list_print = result.collect();*/
 
-        System.out.println("The more popular brew method among double malt beers is " + max_brew._2() + ", used in  " + max_brew._1()+ " beers");
+        System.out.println("The most popular brew method among double malt beers is " + max_brew._2() + ", used in  " + max_brew._1() + " beers");
 		ss.stop();
 	}
 }
