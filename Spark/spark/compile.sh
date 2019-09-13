@@ -3,6 +3,9 @@
 if [ $1 == "KMeans_Clustering" ]; then
 	hdfs dfs -rm -r res_cl
 fi
+if [ $1 == "Bisect_Clustering" ]; then
+	hdfs dfs -rm -r res_bkmeans
+fi
 
 if [ $1 == "C" ]; then
 	rm -rf *.class
