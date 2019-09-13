@@ -88,7 +88,7 @@ SELECT * FROM beers_by_idcolor
 WHERE clusteringid IN (1,2,3)
 AND color >= 40;
 
--- Get the maximum, minimum and average color by volume among all beers
+-- Get the maximum, minimum and average color among all beers
 SELECT MIN(color) AS "Minimum Color", 
 	   MAX(color) AS "Maximum Color", 
 	   AVG(color) AS "Average Color"
